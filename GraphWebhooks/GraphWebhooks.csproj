@@ -177,6 +177,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\SubscriptionStore.cs" />
+    <Compile Include="Helpers\GraphHttpClient.cs" />
     <Compile Include="Models\Message.cs" />
     <Compile Include="Models\Notification.cs" />
     <Compile Include="Models\Subscription.cs" />
