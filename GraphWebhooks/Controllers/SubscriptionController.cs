@@ -14,6 +14,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using GraphWebhooks.Helpers;
 using System.Security.Claims;
+using System.Collections.Generic;
 
 namespace GraphWebhooks.Controllers
 {
@@ -43,11 +44,6 @@ namespace GraphWebhooks.Controllers
                 return View("Error", e);
             }
 
-            // Build the request.
-            HttpClient client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
             // This sample subscribes to get notifications when the user receives an email.
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, subscriptionsEndpoint);
             Subscription subscription = new Subscription
@@ -65,7 +61,9 @@ namespace GraphWebhooks.Controllers
             request.Content = new StringContent(contentString, System.Text.Encoding.UTF8, "application/json");
 
             // Send the `POST subscriptions` request and parse the response.
-            HttpResponseMessage response = await client.SendAsync(request);
+            GraphHttpClient graphHttpClient = new GraphHttpClient(accessToken);
+            HttpResponseMessage response = await graphHttpClient.SendAsync(request);
+
             if (response.IsSuccessStatusCode)
             {
                 string stringResult = await response.Content.ReadAsStringAsync();
@@ -113,15 +111,12 @@ namespace GraphWebhooks.Controllers
 
             if (!string.IsNullOrEmpty(subscriptionId))
             {
-
-                // Build the request.
-                HttpClient client = new HttpClient();
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, subscriptionsEndpoint + subscriptionId);
 
                 // Send the `DELETE subscriptions/id` request.
-                HttpResponseMessage response = await client.SendAsync(request);
+                GraphHttpClient graphHttpClient = new GraphHttpClient(accessToken);
+                HttpResponseMessage response = await graphHttpClient.SendAsync(request);
+
                 if (!response.IsSuccessStatusCode)
                 {
                     return RedirectToAction("Index", "Error", new { message = response.StatusCode, debug = response.Content.ReadAsStringAsync() });
