@@ -5,6 +5,8 @@
 
 using GraphWebhooks.TokenStorage;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.Notifications;
@@ -83,8 +85,15 @@ namespace GraphWebhooks
 
             SampleTokenCache tokenCache = new SampleTokenCache(userObjectId);
 
-            var cca = new ConfidentialClientApplication(ClientId, context.Request.Uri.ToString(), 
-                new ClientCredential(ClientSecret), tokenCache.GetMsalCacheInstance(), null);
+            var credential = new ClientCredential(ClientSecret);
+
+            var cca = new ConfidentialClientApplication(
+                ClientId,
+                context.Request.Uri.ToString(),
+                credential,
+                tokenCache.GetMsalCacheInstance(),
+                null);
+
 
             try
             {
