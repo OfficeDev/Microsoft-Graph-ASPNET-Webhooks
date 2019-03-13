@@ -3,6 +3,7 @@
  *  See LICENSE in the source repository root for complete license information.
  */
 
+using GraphWebhooks.Models;
 using GraphWebhooks.TokenStorage;
 using Microsoft.Identity.Client;
 using Microsoft.Owin.Security;
@@ -12,8 +13,10 @@ using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
 using System;
 using System.Configuration;
+using System.IdentityModel.Claims;
 using System.IdentityModel.Tokens;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace GraphWebhooks
 {
@@ -22,6 +25,7 @@ namespace GraphWebhooks
         public static string ClientId = ConfigurationManager.AppSettings["ida:ClientId"];
         public static string ClientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string AadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
+        private static string RedirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
         public static string[] Scopes = ConfigurationManager.AppSettings["ida:AppScopes"]
           .Replace(' ', ',').Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -77,23 +81,38 @@ namespace GraphWebhooks
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
         {
-            // If there is a code in the OpenID Connect response, redeem it for an access token and store it away.
+            //// If there is a code in the OpenID Connect response, redeem it for an access token and store it away.
+            //var code = context.Code;
+            //string userObjectId = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+
+            //SampleTokenCache tokenCache = new SampleTokenCache(userObjectId);
+
+            //var cca = new ConfidentialClientApplication(ClientId, context.Request.Uri.ToString(),
+            //    new ClientCredential(ClientSecret), tokenCache.GetMsalCacheInstance(), null);
+
+            //try
+            //{
+            //    var result = await cca.AcquireTokenByAuthorizationCodeAsync(code, Scopes);
+            //}
+            //catch (MsalException ex)
+            //{
+            //    context.HandleResponse();
+            //    context.Response.Redirect($"/error/index?message={ex.Message}");
+            //}
+
             var code = context.Code;
-            string userObjectId = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
-
-            SampleTokenCache tokenCache = new SampleTokenCache(userObjectId);
-
-            var cca = new ConfidentialClientApplication(ClientId, context.Request.Uri.ToString(), 
-                new ClientCredential(ClientSecret), tokenCache.GetMsalCacheInstance(), null);
+            string signedInUserID = context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.NameIdentifier).Value;
+            TokenCache userTokenCache = new MSALSessionCache(signedInUserID, context.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase).GetMsalCacheInstance();
+            ConfidentialClientApplication cca = new ConfidentialClientApplication(ClientId, RedirectUri, new ClientCredential(ClientSecret), userTokenCache, null);
+            string[] scopes = { "Mail.Read" };
 
             try
             {
-                var result = await cca.AcquireTokenByAuthorizationCodeAsync(code, Scopes);
+                AuthenticationResult result = await cca.AcquireTokenByAuthorizationCodeAsync(code, scopes);
             }
-            catch (MsalException ex)
+            catch (Exception ex)
             {
-                context.HandleResponse();
-                context.Response.Redirect($"/error/index?message={ex.Message}");
+                context.Response.Write(ex.Message);
             }
         }
     }

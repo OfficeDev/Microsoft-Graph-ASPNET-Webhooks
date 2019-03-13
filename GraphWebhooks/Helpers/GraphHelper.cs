@@ -3,11 +3,14 @@
  *  See LICENSE in the source repository root for complete license information.
  */
 
+using GraphWebhooks.Models;
 using GraphWebhooks.TokenStorage;
 using Microsoft.Graph;
 using Microsoft.Identity.Client;
 using System.Linq;
 using System.Net.Http.Headers;
+using System.Security.Claims;
+using System.Security.Policy;
 
 namespace GraphWebhooks.Helpers
 {
@@ -19,13 +22,21 @@ namespace GraphWebhooks.Helpers
                 new DelegateAuthenticationProvider(
                     async (request) =>
                     {
-                        var tokenCache = new SampleTokenCache(userId);
+                        //var tokenCache = new SampleTokenCache(userId);
 
-                        var cca = new ConfidentialClientApplication(Startup.ClientId, redirect,
-                            new ClientCredential(Startup.ClientSecret), tokenCache.GetMsalCacheInstance(), null);
+                        //var cca = new ConfidentialClientApplication(Startup.ClientId, redirect,
+                        //    new ClientCredential(Startup.ClientSecret), tokenCache.GetMsalCacheInstance(), null);
 
-                        var authResult = await cca.AcquireTokenSilentAsync(Startup.Scopes, cca.Users.First());
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
+                        //AuthenticationResult authResult = null;
+                        //var accounts = await cca.GetAccountAsync(userId); // await cca.AcquireTokenSilentAsync(Startup.Scopes, cca.Users.First());
+                        //authResult = await cca.AcquireTokenSilentAsync(Startup.Scopes, cca.Users.First()); //await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.);
+                        //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
+
+                        string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
+                        TokenCache userTokenCache = new MSALSessionCache(signedInUserID, this.HttpContext).GetMsalCacheInstance();
+                        ConfidentialClientApplication cca = new ConfidentialClientApplication(Startup.ClientId, redirect, new ClientCredential(Startup.ClientSecret), userTokenCache, null);
+                        var accounts = await cca.GetAccountsAsync();
+                                              
                     }));
 
             return graphClient;
