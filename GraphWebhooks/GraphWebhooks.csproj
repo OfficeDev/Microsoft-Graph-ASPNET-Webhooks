@@ -197,6 +197,7 @@
     <Compile Include="SignalR\NotificationService.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="TokenStorage\SampleTokenCache.cs" />
+    <Compile Include="Utils\OAuth2CodeRedeemerMiddleware.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\bootstrap-grid.css" />

@@ -4,7 +4,6 @@
  */
 
 using GraphWebhooks.Models;
-using GraphWebhooks.TokenStorage;
 using Microsoft.Identity.Client;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
@@ -17,6 +16,7 @@ using System.IdentityModel.Claims;
 using System.IdentityModel.Tokens;
 using System.Threading.Tasks;
 using System.Web;
+using GraphWebhooks.Utils;
 
 namespace GraphWebhooks
 {
@@ -35,15 +35,26 @@ namespace GraphWebhooks
 
             app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
+            // Custom middleware initialization
+            app.UseOAuth2CodeRedeemer(
+                new OAuth2CodeRedeemerOptions
+                {
+                    ClientId = ClientId,
+                    ClientSecret = ClientSecret,
+                    RedirectUri =  RedirectUri
+                }
+                );
+
             app.UseOpenIdConnectAuthentication(
                 new OpenIdConnectAuthenticationOptions
                 {
                     ClientId = ClientId,
                     Authority = $"{ AadInstance }/common/v2.0",
                     Scope = "openid offline_access profile email " + string.Join(" ", Scopes),
+                    RedirectUri = RedirectUri,
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                        NameClaimType = "name",
+                       // NameClaimType = "name",
                         // instead of using the default validation (validating against a single issuer value, as we do in line of business apps), 
                         // we inject our own multitenant validation logic
                         ValidateIssuer = false,
@@ -51,7 +62,7 @@ namespace GraphWebhooks
                         // of validating the Issuer here.
                         // IssuerValidator
                     },
-                    Notifications = new OpenIdConnectAuthenticationNotifications()
+                    Notifications = new OpenIdConnectAuthenticationNotifications
                     {
                         AuthorizationCodeReceived = OnAuthorizationCodeReceived,
                         RedirectToIdentityProvider = (context) =>
@@ -80,25 +91,7 @@ namespace GraphWebhooks
         }
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
-        {
-            //// If there is a code in the OpenID Connect response, redeem it for an access token and store it away.
-            //var code = context.Code;
-            //string userObjectId = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
-
-            //SampleTokenCache tokenCache = new SampleTokenCache(userObjectId);
-
-            //var cca = new ConfidentialClientApplication(ClientId, context.Request.Uri.ToString(),
-            //    new ClientCredential(ClientSecret), tokenCache.GetMsalCacheInstance(), null);
-
-            //try
-            //{
-            //    var result = await cca.AcquireTokenByAuthorizationCodeAsync(code, Scopes);
-            //}
-            //catch (MsalException ex)
-            //{
-            //    context.HandleResponse();
-            //    context.Response.Redirect($"/error/index?message={ex.Message}");
-            //}
+        {           
 
             var code = context.Code;
             string signedInUserID = context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -114,6 +107,6 @@ namespace GraphWebhooks
             {
                 context.Response.Write(ex.Message);
             }
-        }
+        }       
     }
 }

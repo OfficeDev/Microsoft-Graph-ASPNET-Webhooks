@@ -11,6 +11,7 @@ using System.Linq;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Security.Policy;
+using System.Web;
 
 namespace GraphWebhooks.Helpers
 {
@@ -32,11 +33,14 @@ namespace GraphWebhooks.Helpers
                         //authResult = await cca.AcquireTokenSilentAsync(Startup.Scopes, cca.Users.First()); //await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.);
                         //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
 
+                        HttpContextBase context = HttpContext.Current.GetOwinContext().Environment["System.Web.HttpContextBase"] as HttpContextBase;
+                        
                         string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
-                        TokenCache userTokenCache = new MSALSessionCache(signedInUserID, this.HttpContext).GetMsalCacheInstance();
+                        TokenCache userTokenCache = new MSALSessionCache(signedInUserID, context).GetMsalCacheInstance();
                         ConfidentialClientApplication cca = new ConfidentialClientApplication(Startup.ClientId, redirect, new ClientCredential(Startup.ClientSecret), userTokenCache, null);
                         var accounts = await cca.GetAccountsAsync();
-                                              
+                        AuthenticationResult result = await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.First());
+
                     }));
 
             return graphClient;
