@@ -11,7 +11,7 @@
 @section Scripts {
     <script src="https://ajax.aspnetcdn.com/ajax/signalr/jquery.signalr-2.2.1.min.js"></script>
     <script>
-        var connection = $.hubConnection();
+        var connection = $.hubConnection("https://localhost:44300");
         var hub = connection.createHubProxy("NotificationHub");
         hub.on("showNotification", function (messages) {
             $.each(messages, function (index, current) {                       // Iterate through the message collection

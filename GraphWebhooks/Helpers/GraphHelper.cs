@@ -40,7 +40,7 @@ namespace GraphWebhooks.Helpers
                         ConfidentialClientApplication cca = new ConfidentialClientApplication(Startup.ClientId, redirect, new ClientCredential(Startup.ClientSecret), userTokenCache, null);
                         var accounts = await cca.GetAccountsAsync();
                         AuthenticationResult result = await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.First());
-
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
                     }));
 
             return graphClient;
