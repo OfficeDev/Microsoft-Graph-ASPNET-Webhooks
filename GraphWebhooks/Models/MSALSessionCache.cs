@@ -36,21 +36,21 @@ namespace GraphWebhooks.Models
         public void SaveUserStateValue(string state)
         {
             SessionLock.EnterWriteLock();
-            httpContext.Session[CacheId + "_state"] = state;
+            httpContext.Cache[CacheId + "_state"] = state;
             SessionLock.ExitWriteLock();
         }
         public string ReadUserStateValue()
         {
             string state = string.Empty;
             SessionLock.EnterReadLock();
-            state = (string)httpContext.Session[CacheId + "_state"];
+            state = (string)httpContext.Cache[CacheId + "_state"];
             SessionLock.ExitReadLock();
             return state;
         }
         public void Load()
         {
             SessionLock.EnterReadLock();
-            byte[] blob = (byte[])httpContext.Session[CacheId];
+            byte[] blob = (byte[])httpContext.Cache[CacheId];
             if (blob != null)
             {
                 cache.Deserialize(blob);
@@ -63,7 +63,7 @@ namespace GraphWebhooks.Models
             SessionLock.EnterWriteLock();
 
             // Reflect changes in the persistent store
-            httpContext.Session[CacheId] = cache.Serialize();
+            httpContext.Cache[CacheId] = cache.Serialize();
             SessionLock.ExitWriteLock();
         }
 

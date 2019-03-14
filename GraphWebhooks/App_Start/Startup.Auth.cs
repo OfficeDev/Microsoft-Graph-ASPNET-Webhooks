@@ -54,7 +54,7 @@ namespace GraphWebhooks
                     RedirectUri = RedirectUri,
                     TokenValidationParameters = new TokenValidationParameters
                     {
-                       // NameClaimType = "name",
+                        NameClaimType = "name",
                         // instead of using the default validation (validating against a single issuer value, as we do in line of business apps), 
                         // we inject our own multitenant validation logic
                         ValidateIssuer = false,
