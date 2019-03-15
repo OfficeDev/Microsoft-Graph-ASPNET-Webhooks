@@ -73,15 +73,15 @@ In this exercise, you will create a new Azure AD web application registration us
 
 1. From the **Manage** page, select **API permissions** > **Add a permission**.
 
-![A screenshot of Select API Permissions](./images/aad-api-permissions.png)
+![A screenshot of Select API Permissions](./images/aad-api-permissions.PNG)
 
 10. Choose **Microsoft API** > **Microsoft Graph**.
 
-![A screenshot of Request API permissions](./images/aad-request-api-permissions.png)
+![A screenshot of Request API permissions](./images/aad-request-api-permissions.PNG)
 
 11. Choose **Delegated permissions**. In the search box, type **Mail.Read** and select the first option from the list. Select **Add permissions**.
 
-![A screenshot of Delegated permissions](./images/aad-delegated-permissions.png)
+![A screenshot of Delegated permissions](./images/aad-delegated-permissions.PNG)
 
 
 ### Set up the ngrok proxy (optional)
