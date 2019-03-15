@@ -1,8 +1,11 @@
 ﻿<ul class="navbar-nav justify-content-end">
     @if (Request.IsAuthenticated)
     {
+        System.Security.Claims.Claim claim = System.Security.Claims.ClaimsPrincipal.Current.FindFirst("preferred_username");
+        string name = claim != null ? claim.Value : string.Empty;
+
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">@User.Identity.Name</a>
+            <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">@name</a>
             <div class="dropdown-menu">
                 @Html.ActionLink("Sign Out", "SignOut", "Account", new { area = "" }, new { @class = "dropdown-item" })
             </div>
