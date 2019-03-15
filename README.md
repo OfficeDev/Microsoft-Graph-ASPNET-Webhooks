@@ -32,17 +32,45 @@ To use the Microsoft Graph ASP.NET Webhooks sample, you need the following:
 - A public HTTPS endpoint to receive and send HTTP requests. You can host this on Microsoft Azure or another service, or you can [use ngrok](#set-up-the-ngrok-proxy-optional) or a similar tool while testing.
 
 ### Register the app
+In this exercise, you will create a new Azure AD web application registration using the Azure Active Directory admin center.
 
-This app uses the Azure AD v2 endpoint, so you'll register it in the [Application Registration Portal](https://apps.dev.microsoft.com).
+1. Determine your ASP.NET app's URL. In Visual Studio's Solution Explorer, select the **graph-tutorial** project. In the **Properties** window, find the value of **URL**. Copy this value.
 
-1. Sign in to the portal with either your Microsoft account, or your work or school account.
-1. Choose **Add an app**.
-1. Enter a friendly name for the application and choose **Create application**.
-1. Locate the **Application Secrets** section and choose **Generate New Password**. Copy the password now and save it to a safe place. Once you've copied the password, click **Ok**.
-1. Locate the **Platforms** section, and choose **Add Platform**. Choose **Web**, then enter `https://localhost:44300` under **Redirect URIs**.
-1. Choose **Save** at the bottom of the page.
+    ![Screenshot of the Visual Studio Properties window](./images/vs-project-url.png)
 
-You'll use the application ID and secret to configure the app in Visual Studio.
+1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com). Login using a **personal account** (aka: Microsoft Account) or **Work or School Account**.
+
+1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations (Preview)** under **Manage**.
+
+    ![A screenshot of the App registrations ]z(./images/aad-portal-app-registrations.png)
+
+1. Select **New registration**. On the **Register an application** page, set the values as follows.
+
+    - Set **Name** to `ASP.NET Graph Tutorial`.
+    - Set **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts**.
+    - Under **Redirect URI**, set the first drop-down to `Web` and set the value to the ASP.NET app URL you copied in step 1.
+
+    ![A screenshot of the Register an application page](./images/aad-register-an-app.png)
+
+1. Choose **Register**. On the **ASP.NET Graph Tutorial** page, copy the value of the **Application (client) ID** and save it, you will need it in the next step.
+
+    ![A screenshot of the application ID of the new app registration](./images/aad-application-id.png)
+
+1. Select **Authentication** under **Manage**. Locate the **Implicit grant** section and enable **ID tokens**. Choose **Save**.
+
+    ![A screenshot of the Implicit grant section](./images/aad-implicit-grant.png)
+
+1. Select **Certificates & secrets** under **Manage**. Select the **New client secret** button. Enter a value in **Description** and select one of the options for **Expires** and choose **Add**.
+
+    ![A screenshot of the Add a client secret dialog](./images/aad-new-client-secret.png)
+
+1. Copy the client secret value before you leave this page. You will need it in the next step.
+
+    > [!IMPORTANT]
+    > This client secret is never shown again, so make sure you copy it now.
+
+    ![A screenshot of the newly added client secret](./images/aad-copy-client-secret.png)
+
 
 ### Set up the ngrok proxy (optional)
 
