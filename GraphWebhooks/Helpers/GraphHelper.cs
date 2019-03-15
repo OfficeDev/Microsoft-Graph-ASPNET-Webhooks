@@ -22,17 +22,7 @@ namespace GraphWebhooks.Helpers
             var graphClient = new GraphServiceClient(
                 new DelegateAuthenticationProvider(
                     async (request) =>
-                    {
-                        //var tokenCache = new SampleTokenCache(userId);
-
-                        //var cca = new ConfidentialClientApplication(Startup.ClientId, redirect,
-                        //    new ClientCredential(Startup.ClientSecret), tokenCache.GetMsalCacheInstance(), null);
-
-                        //AuthenticationResult authResult = null;
-                        //var accounts = await cca.GetAccountAsync(userId); // await cca.AcquireTokenSilentAsync(Startup.Scopes, cca.Users.First());
-                        //authResult = await cca.AcquireTokenSilentAsync(Startup.Scopes, cca.Users.First()); //await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.);
-                        //request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-
+                    {                       
                         HttpContextBase context = HttpContext.Current.GetOwinContext().Environment["System.Web.HttpContextBase"] as HttpContextBase;
                         
                         string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
@@ -40,7 +30,7 @@ namespace GraphWebhooks.Helpers
                         ConfidentialClientApplication cca = new ConfidentialClientApplication(Startup.ClientId, redirect, new ClientCredential(Startup.ClientSecret), userTokenCache, null);
                         var accounts = await cca.GetAccountsAsync();
                         AuthenticationResult result = await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.First());
-                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
+
                     }));
 
             return graphClient;
