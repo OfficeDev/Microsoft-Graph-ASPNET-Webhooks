@@ -34,11 +34,11 @@ To use the Microsoft Graph ASP.NET Webhooks sample, you need the following:
 ### Register the app
 In this exercise, you will create a new Azure AD web application registration using the Azure Active Directory admin center.
 
-1. Determine your ASP.NET app's URL. In Visual Studio's Solution Explorer, select the **graph-tutorial** project. In the **Properties** window, find the value of **URL**. Copy this value.
+1. Determine your ASP.NET app's URL. In Visual Studio's Solution Explorer, select the **GraphWebhooks** project. In the **Properties** window, find the value of **URL**. Copy this value.
 
     ![Screenshot of the Visual Studio Properties window](./images/vs-project-url.png)
 
-1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com). Login using a **personal account** (aka: Microsoft Account) or **Work or School Account**.
+1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com). Login using a **Work or School Account**.
 
 1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations (Preview)** under **Manage**.
 
@@ -46,13 +46,13 @@ In this exercise, you will create a new Azure AD web application registration us
 
 1. Select **New registration**. On the **Register an application** page, set the values as follows.
 
-    - Set **Name** to `ASP.NET Graph Tutorial`.
-    - Set **Supported account types** to **Accounts in any organizational directory and personal Microsoft accounts**.
+    - Set a preferred **Name** eg `GraphWebhooks Sample`.
+    - Set **Supported account types** to **Accounts in any organizational directory**.
     - Under **Redirect URI**, set the first drop-down to `Web` and set the value to the ASP.NET app URL you copied in step 1.
 
     ![A screenshot of the Register an application page](./images/aad-register-an-app.png)
 
-1. Choose **Register**. On the **ASP.NET Graph Tutorial** page, copy the value of the **Application (client) ID** and save it, you will need it in the next step.
+1. Choose **Register**. On the **GraphWebhooks Sample** page, copy the value of the **Application (client) ID** and save it, you will need it in the next step.
 
     ![A screenshot of the application ID of the new app registration](./images/aad-application-id.png)
 
