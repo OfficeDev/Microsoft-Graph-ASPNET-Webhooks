@@ -22,14 +22,16 @@ namespace GraphWebhooks.Helpers
             var graphClient = new GraphServiceClient(
                 new DelegateAuthenticationProvider(
                     async (request) =>
-                    {                       
-                        HttpContextBase context = HttpContext.Current.GetOwinContext().Environment["System.Web.HttpContextBase"] as HttpContextBase;
-                        
-                        string signedInUserID = ClaimsPrincipal.Current.FindFirst(ClaimTypes.NameIdentifier).Value;
-                        TokenCache userTokenCache = new MSALSessionCache(signedInUserID, context).GetMsalCacheInstance();
-                        ConfidentialClientApplication cca = new ConfidentialClientApplication(Startup.ClientId, redirect, new ClientCredential(Startup.ClientSecret), userTokenCache, null);
+                    {                     
+                        var tokenCache = new SampleTokenCache(userId);
+
+                        var cca = new ConfidentialClientApplication(Startup.ClientId, redirect,
+                            new ClientCredential(Startup.ClientSecret), tokenCache.GetMsalCacheInstance(), null);
+
                         var accounts = await cca.GetAccountsAsync();
-                        AuthenticationResult result = await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.First());
+
+                        var authResult = await cca.AcquireTokenSilentAsync(Startup.Scopes, accounts.First());
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
 
                     }));
 

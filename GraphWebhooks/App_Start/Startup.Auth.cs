@@ -3,7 +3,6 @@
  *  See LICENSE in the source repository root for complete license information.
  */
 
-using GraphWebhooks.Models;
 using Microsoft.Identity.Client;
 using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
@@ -12,11 +11,9 @@ using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
 using System;
 using System.Configuration;
-using System.IdentityModel.Claims;
 using System.IdentityModel.Tokens;
 using System.Threading.Tasks;
-using System.Web;
-using GraphWebhooks.Utils;
+using GraphWebhooks.TokenStorage;
 
 namespace GraphWebhooks
 {
@@ -25,7 +22,6 @@ namespace GraphWebhooks
         public static string ClientId = ConfigurationManager.AppSettings["ida:ClientId"];
         public static string ClientSecret = ConfigurationManager.AppSettings["ida:ClientSecret"];
         public static string AadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
-        private static string RedirectUri = ConfigurationManager.AppSettings["ida:RedirectUri"];
         public static string[] Scopes = ConfigurationManager.AppSettings["ida:AppScopes"]
           .Replace(' ', ',').Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
@@ -33,17 +29,7 @@ namespace GraphWebhooks
         {
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
 
-            app.UseCookieAuthentication(new CookieAuthenticationOptions());
-
-            // Custom middleware initialization
-            app.UseOAuth2CodeRedeemer(
-                new OAuth2CodeRedeemerOptions
-                {
-                    ClientId = ClientId,
-                    ClientSecret = ClientSecret,
-                    RedirectUri =  RedirectUri
-                }
-                );
+            app.UseCookieAuthentication(new CookieAuthenticationOptions());                       
 
             app.UseOpenIdConnectAuthentication(
                 new OpenIdConnectAuthenticationOptions
@@ -51,7 +37,6 @@ namespace GraphWebhooks
                     ClientId = ClientId,
                     Authority = $"{ AadInstance }/common/v2.0",
                     Scope = "openid offline_access profile email " + string.Join(" ", Scopes),
-                    RedirectUri = RedirectUri,
                     TokenValidationParameters = new TokenValidationParameters
                     {
                         NameClaimType = "name",
@@ -62,7 +47,7 @@ namespace GraphWebhooks
                         // of validating the Issuer here.
                         // IssuerValidator
                     },
-                    Notifications = new OpenIdConnectAuthenticationNotifications
+                    Notifications = new OpenIdConnectAuthenticationNotifications()
                     {
                         AuthorizationCodeReceived = OnAuthorizationCodeReceived,
                         RedirectToIdentityProvider = (context) =>
@@ -91,21 +76,23 @@ namespace GraphWebhooks
         }
 
         private async Task OnAuthorizationCodeReceived(AuthorizationCodeReceivedNotification context)
-        {           
-
+        {
             var code = context.Code;
-            string signedInUserID = context.AuthenticationTicket.Identity.FindFirst(ClaimTypes.NameIdentifier).Value;
-            TokenCache userTokenCache = new MSALSessionCache(signedInUserID, context.OwinContext.Environment["System.Web.HttpContextBase"] as HttpContextBase).GetMsalCacheInstance();
-            ConfidentialClientApplication cca = new ConfidentialClientApplication(ClientId, RedirectUri, new ClientCredential(ClientSecret), userTokenCache, null);
-            string[] scopes = { "Mail.Read" };
+            string userObjectId = context.AuthenticationTicket.Identity.FindFirst("http://schemas.microsoft.com/identity/claims/objectidentifier").Value;
+
+            SampleTokenCache tokenCache = new SampleTokenCache(userObjectId);
+
+            var cca = new ConfidentialClientApplication(ClientId, context.Request.Uri.ToString(),
+                new ClientCredential(ClientSecret), tokenCache.GetMsalCacheInstance(), null);
 
             try
             {
-                AuthenticationResult result = await cca.AcquireTokenByAuthorizationCodeAsync(code, scopes);
+                var result = await cca.AcquireTokenByAuthorizationCodeAsync(code, Scopes);
             }
-            catch (Exception ex)
+            catch (MsalException ex)
             {
-                context.Response.Write(ex.Message);
+                context.HandleResponse();
+                context.Response.Redirect($"/error/index?message={ex.Message}");
             }
         }       
     }
