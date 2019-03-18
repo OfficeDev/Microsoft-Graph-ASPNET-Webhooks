@@ -46,7 +46,7 @@ In this exercise, you will create a new Azure AD web application registration us
 
 1. Select **New registration**. On the **Register an application** page, set the values as follows.
 
-    - Set a preferred **Name** eg `GraphWebhooks Sample`.
+    - Set a preferred **Name** e.g. `GraphWebhooks Sample`.
     - Set **Supported account types** to **Accounts in any organizational directory**.
     - Under **Redirect URI**, set the first drop-down to `Web` and set the value to the ASP.NET app SSL URL you copied in step 1.
 
